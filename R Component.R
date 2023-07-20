@@ -1,25 +1,26 @@
-install.packages(glue)
 # importing packages/libraries
-library(httr)
+#library(httr)
 library(jsonlite)
-library(glue)
-# declaring all pairs of currency pairs we need
-pairs < - c("DOGEUSDT", "BTCUSDT", "ETHUSDT")
+#library(glue)
+library(websocket)
 
-# running loop
-for (i in 1: 3){
-  p < - pairs[i]  # storing pair in p variable by it's index value
-  
-  # completing url and storing it in url variable
-  url = paste0("6bee1498-9d86-4e83-bd5e-4d56865abb9e", p)
-  r < - GET(url)  # requesting url data
-  res = rawToChar(r$content)  # converting raw content to char format
-  data = fromJSON(res)  # converting char to json format
-  
-  # storing keys and values of json data in separate variables
-  pair < - data$symbol
-  value < - data$price
-  
-  # printing output
-  print(paste(pair, "price is", value))
-}
+ws <- websocket::WebSocket$new('wss://ws-feed.exchange.coinbase.com',autoConnect = FALSE)
+
+ws$onMessage(function(message) {
+  d <- message$data
+  print(message$data)
+})
+
+ws$onClose(function(event) {
+  cat("Client disconnected\n")
+})
+
+ws$onOpen(function(event) {
+  cat("Client connected\n")
+})
+
+ws$connect()
+Sys.sleep(10)
+ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
+Sys.sleep(3)
+ws$close()
