@@ -3,6 +3,7 @@
 #library(glue)
 library(jsonlite)
 library(websocket)
+library(powerbiR)
 
 count <- 0
 ws <- websocket::WebSocket$new('wss://ws-feed.exchange.coinbase.com',autoConnect = FALSE)
@@ -17,8 +18,8 @@ ws$onMessage(function(message) {
   price <- parsed_json$changes[2]
   amount <- parsed_json$changes[3]
   time <- parsed_json$time
-  print(paste(product_id,":",change_type,price,count))
-  count <- count + 1
+  #print(paste(product_id,":",change_type,price,count))
+  count <<- count + 1
 })
 
 ws$onClose(function(event) {
@@ -30,7 +31,7 @@ ws$onOpen(function(event) {
 })
 
 ws$connect()
-Sys.sleep(8)
+Sys.sleep(10)
 ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
 Sys.sleep(1)
 ws$close()
