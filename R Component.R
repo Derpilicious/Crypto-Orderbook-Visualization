@@ -3,10 +3,18 @@
 #library(glue)
 library(jsonlite)
 library(websocket)
-library(powerbiR)
+#library(powerbiR)
+library(odbc)
 
-count <- 0
 ws <- websocket::WebSocket$new('wss://ws-feed.exchange.coinbase.com',autoConnect = FALSE)
+
+df <-df <- data.frame(type = character(),
+                      product_id = character(),
+                      change_type = character(),
+                      price = numeric(),
+                      amount = numeric(),
+                      time = character(),
+                      stringsAsFactors = FALSE)
 
 ws$onMessage(function(message) {
   #print(message$data)
@@ -18,31 +26,20 @@ ws$onMessage(function(message) {
   price <- parsed_json$changes[2]
   amount <- parsed_json$changes[3]
   time <- parsed_json$time
-  #print(paste(product_id,":",change_type,price,count))
-  count <<- count + 1
+  print(paste(product_id,":",change_type,price))
 })
 
 ws$onClose(function(event) {
-  cat("Client disconnected\n")
+  cat("Client disconnected!\n")
 })
 
 ws$onOpen(function(event) {
-  cat("Client connected\n")
+  cat("Client connected!\n")
 })
 
 ws$connect()
 Sys.sleep(10)
 ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
-Sys.sleep(1)
+#Sys.sleep(2)
 ws$close()
 
-#sqldf('SELECT
-#      JSON_VALUE(json_data, \'$.type\') AS type,
-#      JSON_VALUE(json_data, \'$.product_id\') AS product_id,
-#      JSON_VALUE(json_data, \'$.changes[0][0]\') AS change_type,
-#      JSON_VALUE(json_data, \'$.changes[0][1]\') AS change_value,
-#      JSON_VALUE(json_data, \'$.changes[0][2]\') AS change_amount,
-#      JSON_VALUE(json_data, \'$.time\') AS time
-#      FROM
-#      data_table;'
-#)
