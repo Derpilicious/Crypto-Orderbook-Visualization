@@ -8,13 +8,13 @@ library(odbc)
 
 ws <- websocket::WebSocket$new('wss://ws-feed.exchange.coinbase.com',autoConnect = FALSE)
 
-df <-df <- data.frame(type = character(),
-                      product_id = character(),
-                      change_type = character(),
-                      price = numeric(),
-                      amount = numeric(),
-                      time = character(),
-                      stringsAsFactors = FALSE)
+df <- data.frame(product_id = character(),
+                 change_type = character(),
+                 price = character(),
+                 count = character(),
+                 stringsAsFactors = FALSE)
+
+count <- -2
 
 ws$onMessage(function(message) {
   #print(message$data)
@@ -26,7 +26,9 @@ ws$onMessage(function(message) {
   price <- parsed_json$changes[2]
   amount <- parsed_json$changes[3]
   time <- parsed_json$time
-  print(paste(product_id,":",change_type,price))
+  count <<- count + 1
+  print(paste(product_id,":",change_type,price,count))
+  df[nrow(df) + 1,] <<- list(product_id, change_type, price, count)
 })
 
 ws$onClose(function(event) {
@@ -40,6 +42,10 @@ ws$onOpen(function(event) {
 ws$connect()
 Sys.sleep(10)
 ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
-#Sys.sleep(2)
-ws$close()
+#Sys.sleep(10)
+#ws$close()
 
+df$price <- as.numeric(as.character(df$price))
+dim(df)
+summary(df)
+head(df)
