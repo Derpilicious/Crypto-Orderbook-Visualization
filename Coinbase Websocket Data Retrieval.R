@@ -26,6 +26,10 @@ dfdataframe <- data.frame(product_id = character(),
                           count = character(),
                           stringsAsFactors = FALSE)
 
+duration <- 2
+
+wsconnection <- FALSE
+
 ws$onMessage(function(message) {
   #print(message$data)
   parsed_json <- fromJSON(message$data)
@@ -48,19 +52,27 @@ ws$onClose(function(event) {
 
 ws$onOpen(function(event) {
   cat("Client connected!\n")
+  wsconnection <<- TRUE
 })
 
 ws$connect()
   
-Sys.sleep(10)
+while (TRUE){
+  if (wsconnection){
+    break
+  }
+}
   
-ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
-  
-Sys.sleep(1)
-  
+ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"DOGE-USD\"]}")
+
+start <- as.numeric(Sys.time())
+
+while(as.numeric(Sys.time())-start < duration) {
+}
+
 ws$close()
 
-Sys.sleep(5)
+#Sys.sleep(5)
 
 dbWriteTable(conn = conn, 
              name = "Crypto Orderbook Data", 
