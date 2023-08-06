@@ -26,8 +26,6 @@ dfdataframe <- data.frame(product_id = character(),
                           count = character(),
                           stringsAsFactors = FALSE)
 
-duration <- 2
-
 wsconnection <- FALSE
 
 ws$onMessage(function(message) {
@@ -63,11 +61,11 @@ while (TRUE){
   }
 }
   
-ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"DOGE-USD\"]}")
+ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
 
 start <- as.numeric(Sys.time())
 
-while(as.numeric(Sys.time())-start < duration) {
+while(as.numeric(Sys.time())-start < 5) {
 }
 
 ws$close()

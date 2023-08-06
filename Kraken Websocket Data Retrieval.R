@@ -29,6 +29,7 @@ ws$onClose(function(event) {
 
 ws$onOpen(function(event) {
   cat("Client connected!\n")
+  wsconnection <<- TRUE
 })
 
 conn <- DBI::dbConnect(
@@ -51,11 +52,16 @@ dfdataframe <- data.frame(product_id = character(),
 
 ws$connect()
 
-Sys.sleep(10)
+while (TRUE){
+  if (wsconnection){
+    break
+  }
+}
 
-#ws$send("{\"event\": \"subscribe\",\"pair\": [\"XBT//USD\"],\"subscription\": {\"name\": \"spread\"}}")
+ws$send("{\"event\": \"subscribe\",\"pair\": [\"XBT//USD\"],\"subscription\": {\"name\": \"spread\"}}")
 
-#Sys.sleep(1)
+while(as.numeric(Sys.time())-start < 2) {
+}
 
 ws$close()
 
