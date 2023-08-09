@@ -29,7 +29,7 @@ dfdataframe <- data.frame(product_id = character(),
 wsconnection <- FALSE
 
 ws$onMessage(function(message) {
-  #print(message$data)
+  print(message$data)
   parsed_json <- fromJSON(message$data)
   # Create separate columns for each key-value pair
   type <- parsed_json$type
@@ -39,7 +39,7 @@ ws$onMessage(function(message) {
   amount <- parsed_json$changes[3]
   time <- parsed_json$time
   count <<- count + 1
-  print(paste(product_id,":",change_type,price,count))
+  #print(paste(product_id,":",change_type,price,count))
   #dfdataframe[nrow(dfdataframe) + 1,] <<- list(product_id, change_type, price, count)
   #dfdataframe$price[nrow(dfdataframe)] <- as.numeric(as.character(dfdataframe$price[nrow(dfdataframe)]))
 })
@@ -61,7 +61,7 @@ while (TRUE){
   }
 }
   
-ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\"BTC-USD\"]}")
+ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
 
 start <- as.numeric(Sys.time())
 
