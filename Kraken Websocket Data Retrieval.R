@@ -58,9 +58,11 @@ while (TRUE){
   }
 }
 
-ws$send("{\"event\": \"subscribe\",\"pair\": [\"XBT//USD\"],\"subscription\": {\"name\": \"spread\"}}")
+#ws$send("{\"event\": \"subscribe\",\"pair\": [\"XBT//USD\"],\"subscription\": {\"name\": \"spread\"}}")
 
-while(as.numeric(Sys.time())-start < 2) {
+start <- Sys.time()
+
+while(as.numeric(Sys.time())-start < 5) {
 }
 
 ws$close()

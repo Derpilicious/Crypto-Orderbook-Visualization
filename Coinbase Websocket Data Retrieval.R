@@ -40,8 +40,8 @@ ws$onMessage(function(message) {
   time <- parsed_json$time
   count <<- count + 1
   print(paste(product_id,":",change_type,price,count))
-  dfdataframe[nrow(dfdataframe) + 1,] <<- list(product_id, change_type, price, count)
-  dfdataframe$price[nrow(dfdataframe)] <- as.numeric(as.character(dfdataframe$price[nrow(dfdataframe)]))
+  #dfdataframe[nrow(dfdataframe) + 1,] <<- list(product_id, change_type, price, count)
+  #dfdataframe$price[nrow(dfdataframe)] <- as.numeric(as.character(dfdataframe$price[nrow(dfdataframe)]))
 })
 
 ws$onClose(function(event) {
@@ -65,7 +65,7 @@ ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2\"],\"product_ids\": [\
 
 start <- as.numeric(Sys.time())
 
-while(as.numeric(Sys.time())-start < 5) {
+while(as.numeric(Sys.time())-start < 2) {
 }
 
 ws$close()
