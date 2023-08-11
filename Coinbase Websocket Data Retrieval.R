@@ -1,4 +1,4 @@
-# importing packages/libraries
+#importing packages/libraries
 #library(httr)
 #library(glue)
 library(jsonlite)
@@ -20,11 +20,10 @@ conn <- DBI::dbConnect(
 
 count <- -2
 
-dfdataframe <- data.frame(product_id = character(),
-                          change_type = character(),
-                          price = character(),
-                          count = character(),
-                          stringsAsFactors = FALSE)
+# dfdataframe <- data.frame(product_id = character(),
+#                           change_type = character(),
+#                           price = character(),
+#                           stringsAsFactors = FALSE)
 
 wsconnection <- FALSE
 
@@ -35,8 +34,7 @@ ws$onMessage(function(message) {
   type <- parsed_json$type
   if (type == "snapshot"){
     print("Snapshot received!")
-    print(parsed_json$asks[,1])
-    print(parsed_json$bids[,1])
+    snapshot <<- parsed_json
   }
   #count <<- count + 1
   #print(paste(product_id,":",change_type,price,count))
@@ -60,25 +58,41 @@ while (TRUE){
     break
   }
 }
+
+for (x in 1:2){
+  ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
   
-ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
+  start <- as.numeric(Sys.time())
 
-start <- as.numeric(Sys.time())
+  while(as.numeric(Sys.time())-start < 1) {
+  }
 
-while(as.numeric(Sys.time())-start < 2) {
+  ws$send("{\"type\": \"unsubscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
+
+  #ws$close()
+
+  start <- as.numeric(Sys.time())
+
+  asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1])
+
+  bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1])
+
+  df <- rbind(asks_df, bids_df)
+
+  # df <- list(change_type = c(rep("ask", length(parsed_json$asks)), rep("buy", length(parsed_json$buys))),
+  #            value = c(sapply(parsed_json$asks),sapply(parsed_json$bids)))
+  
+  dbWriteTable(conn = conn, 
+               name = "Crypto Orderbook Data", 
+               value = df,
+               overwrite = TRUE)
+  
+  while(as.numeric(Sys.time())-start < 5) {
+  }
+  
+  head(df)
 }
-
-ws$send("{\"type\": \"unsubscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
-
 ws$close()
 
-#Sys.sleep(5)
-
-dbWriteTable(conn = conn, 
-             name = "Crypto Orderbook Data", 
-             value = dfdataframe,
-             overwrite = TRUE)
-
-head(dfdataframe)
-# mean(na.omit(as.numeric(df[df$change_type == "buy", "price"]), na.rm = TRUE))
-# mean(na.omit(as.numeric(df[df$change_type == "sell", "price"]), na.rm = TRUE))
+#mean(na.omit(as.numeric(df[df$change_type == "asks", "price"])))
+#mean(na.omit(as.numeric(df[df$change_type == "bids", "price"])))
