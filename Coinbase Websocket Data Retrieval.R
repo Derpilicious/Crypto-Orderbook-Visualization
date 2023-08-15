@@ -59,23 +59,23 @@ while (TRUE){
   }
 }
 
-for (x in 1:2){
-  ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
+for (x in 1:1){
+  ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
   
   start <- as.numeric(Sys.time())
 
   while(as.numeric(Sys.time())-start < 1) {
   }
 
-  ws$send("{\"type\": \"unsubscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"DOGE-USD\"]}")
+  ws$send("{\"type\": \"unsubscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
 
   #ws$close()
 
   start <- as.numeric(Sys.time())
 
-  asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1])
+  asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1], depth = snapshot$asks[,2])
 
-  bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1])
+  bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1], depth = snapshot$bids[,2])
 
   df <- rbind(asks_df, bids_df)
 
@@ -90,7 +90,7 @@ for (x in 1:2){
   while(as.numeric(Sys.time())-start < 5) {
   }
   
-  head(df)
+  summary(snapshot)
 }
 ws$close()
 
