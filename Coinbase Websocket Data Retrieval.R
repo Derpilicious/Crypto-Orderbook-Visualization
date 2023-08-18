@@ -86,13 +86,10 @@ for (x in 1:1){
                name = "Crypto Orderbook Data", 
                value = df,
                overwrite = TRUE)
-  
-  while(as.numeric(Sys.time())-start < 5) {
-  }
-  
-  summary(snapshot)
 }
 ws$close()
 
-#mean(na.omit(as.numeric(df[df$change_type == "asks", "price"])))
-#mean(na.omit(as.numeric(df[df$change_type == "bids", "price"])))
+head(df)
+
+#min(na.omit(as.numeric(df[df$change_type == "asks", "price"])))
+#max(na.omit(as.numeric(df[df$change_type == "bids", "price"])))
