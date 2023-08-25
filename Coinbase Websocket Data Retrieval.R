@@ -66,24 +66,46 @@ for (x in 1:1){
   #closing channel subscription
   ws$send("{\"type\": \"unsubscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
   
+  #assigning a tolerance value to keep values within that price range
+  tolerance <- 0.01
+  
+  #price interval
+  interval = 1
+  
   #assigning all asks orders to a df
   asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1], depth = snapshot$asks[,2])
   
+  asks_df$price <- as.numeric(asks_df$price)
+  
+  asks_df$depth <- as.numeric(asks_df$depth)
+  
+  asks_df <- asks_df[asks_df$price >= min(asks_df$price) * (1-tolerance) & asks_df$price <= min(asks_df$price) * (1+ tolerance), ]
+  
+  asks_df$priceintervals <- floor(asks_df$price / interval) * interval
+  
+  asks_df$cumulativedepth <- sapply(seq_len(nrow(asks_df)), function(i) {
+    sum(asks_df$depth[asks_df$price <= asks_df$priceinterval[i]])
+  })
+  
   #assigning all bids orders to a df
-  bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1], depth = snapshot$bids[,2])
+  #bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1], depth = snapshot$bids[,2])
+  
+  #bids_df <- bids_df[bids_df$price >= max(bids_df$price) * (1-tolerance) & bids_df$price <= max(bids_df$price) * (1+ tolerance), ]
   
   #binding both dfs together
-  df <- rbind(asks_df, bids_df)
+  #df <- rbind(asks_df, bids_df)
   
   #writing to SQL Server
-  dbWriteTable(conn = conn, 
-               name = "Crypto Orderbook Data", 
-               value = df,
-               overwrite = TRUE)
+  #dbWriteTable(conn = conn, 
+               #name = "Crypto Orderbook Data", 
+               #value = df,
+               #overwrite = TRUE)
 }
 
 #closing websocket connection
 ws$close()
+
+
 
 #min(na.omit(as.numeric(df[df$change_type == "asks", "price"])))
 #max(na.omit(as.numeric(df[df$change_type == "bids", "price"])))
