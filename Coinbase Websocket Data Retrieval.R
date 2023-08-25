@@ -54,7 +54,7 @@ while (TRUE){
   }
 }
 
-for (x in 1:1){
+for (x in 1:10){
   #sending channel subscription message
   ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
   
@@ -75,37 +75,53 @@ for (x in 1:1){
   #assigning all asks orders to a df
   asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1], depth = snapshot$asks[,2])
   
+  #making price and depth columns the appropriate data type (numeric)
   asks_df$price <- as.numeric(asks_df$price)
-  
   asks_df$depth <- as.numeric(asks_df$depth)
   
+  #filters out everything except orders within 1% of the lowest ask price
   asks_df <- asks_df[asks_df$price >= min(asks_df$price) * (1-tolerance) & asks_df$price <= min(asks_df$price) * (1+ tolerance), ]
   
+  #makes the price intervals column
   asks_df$priceintervals <- floor(asks_df$price / interval) * interval
   
+  #makes the cumulative order depth column 
   asks_df$cumulativedepth <- sapply(seq_len(nrow(asks_df)), function(i) {
     sum(asks_df$depth[asks_df$price <= asks_df$priceinterval[i]])
   })
   
   #assigning all bids orders to a df
-  #bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1], depth = snapshot$bids[,2])
+  bids_df <- data.frame(change_type = rep("bids", length(snapshot$bids[,1])), price = snapshot$bids[,1], depth = snapshot$bids[,2])
   
-  #bids_df <- bids_df[bids_df$price >= max(bids_df$price) * (1-tolerance) & bids_df$price <= max(bids_df$price) * (1+ tolerance), ]
+  #making price and depth columns the appropriate data type (numeric)
+  bids_df$price <- as.numeric(bids_df$price)
+  bids_df$depth <- as.numeric(bids_df$depth)
   
-  #binding both dfs together
-  #df <- rbind(asks_df, bids_df)
+  #filters out everything except orders within 1% of the highest bid price
+  bids_df <- bids_df[bids_df$price >= max(bids_df$price) * (1-tolerance) & bids_df$price <= max(bids_df$price) * (1+ tolerance), ]
   
-  #writing to SQL Server
-  #dbWriteTable(conn = conn, 
-               #name = "Crypto Orderbook Data", 
-               #value = df,
-               #overwrite = TRUE)
+  #makes the price intervals column
+  bids_df$priceintervals <- floor(bids_df$price / interval) * interval
+  
+  #makes the cumulative order depth column 
+  bids_df$cumulativedepth <- sapply(seq_len(nrow(bids_df)), function(i) {
+    sum(bids_df$depth[bids_df$price >= bids_df$priceinterval[i]])
+  })
+  
+  #merging both dfs together
+  df <- merge(x = asks_df, y = bids_df, by = c("change_type", "price", "depth", "priceintervals"), all = TRUE)
+  
+  #writing df to SQL Server
+  dbWriteTable(conn = conn, 
+               name = "Crypto Orderbook Data", 
+               value = df,
+               overwrite = TRUE)
+  
+  #delay between next snapshot
+  start <- as.numeric(Sys.time())
+  while(as.numeric(Sys.time())-start < 2) {
+  }
 }
 
 #closing websocket connection
 ws$close()
-
-
-
-#min(na.omit(as.numeric(df[df$change_type == "asks", "price"])))
-#max(na.omit(as.numeric(df[df$change_type == "bids", "price"])))
