@@ -70,7 +70,7 @@ for (x in 1:10){
   tolerance <- 0.01
   
   #price interval
-  interval = 1
+  interval = 10
   
   #assigning all asks orders to a df
   asks_df <- data.frame(change_type = rep("asks", length(snapshot$asks[,1])), price = snapshot$asks[,1], depth = snapshot$asks[,2])
@@ -105,11 +105,11 @@ for (x in 1:10){
   
   #makes the cumulative order depth column 
   bids_df$cumulativedepth <- sapply(seq_len(nrow(bids_df)), function(i) {
-    sum(bids_df$depth[bids_df$price >= bids_df$priceinterval[i]])
+    sum(bids_df$depth[bids_df$price >= bids_df$price[i]])
   })
   
   #merging both dfs together
-  df <- merge(x = asks_df, y = bids_df, by = c("change_type", "price", "depth", "priceintervals"), all = TRUE)
+  df <- merge(x = asks_df, y = bids_df, by = c("change_type", "price", "priceintervals"), all = TRUE)
   
   #writing df to SQL Server
   dbWriteTable(conn = conn, 
