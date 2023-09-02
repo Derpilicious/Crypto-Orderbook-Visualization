@@ -2,7 +2,7 @@
 
 Orderbook visualization for cryptocurrencies. Uses R to retrieve data from Coinbase websocket, format and upload it to a SQL Server which is then "live streamed" (loaded using DirectQuery) to a PowerBI dashboard. 
 
-![](https://github.com/Derpilicious/Crypto-Orderbook-Visualization/example.gif)
+![](https://github.com/Derpilicious/Crypto-Orderbook-Visualization/blob/main/example.gif)
 ######This is a 2x recording of what the dashboard looks like when the R script is running to collect the most current data. 
 
 The PowerBI file in this repository is currently loaded using a CSV with mock data as there is no way to publish a dashboard connected to a SQL Server without a data gateway which I do not have permission to get with a Waterloo email. 
