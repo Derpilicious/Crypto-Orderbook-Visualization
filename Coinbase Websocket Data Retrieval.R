@@ -21,7 +21,7 @@ conn <- DBI::dbConnect(
 #setting websocket connection to default state of false
 wsconnection <- FALSE
 
-#Verifying that snapshot has been received and assinging it to a global variable
+#Verifying that snapshot has been received and assigning it to a global variable
 ws$onMessage(function(message) {
   #print(message$data)
   parsed_json <- fromJSON(message$data)
@@ -54,7 +54,7 @@ while (TRUE){
   }
 }
 
-for (x in 1:10){
+for (x in 1:1){
   #sending channel subscription message
   ws$send("{\"type\": \"subscribe\",\"channels\": [\"level2_batch\"],\"product_ids\": [\"BTC-USD\"]}")
   
@@ -119,7 +119,7 @@ for (x in 1:10){
   
   #delay between next snapshot
   start <- as.numeric(Sys.time())
-  while(as.numeric(Sys.time())-start < 2) {
+  while(as.numeric(Sys.time())-start < 1) {
   }
 }
 
